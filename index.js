@@ -21,11 +21,12 @@ app.use(express.urlencoded({extended:true}));
 
 //cargar rutas
 const UserRoutes = require("./routes/user")
-//const CategoryRoutes = require("./routes/category")
+const CategoryRoutes = require("./routes/category")
 const BillsRoutes = require("./routes/bills")
 
 app.use("/api/user" ,UserRoutes)
 app.use("/api/bills",BillsRoutes)
+app.use("/api/category",CategoryRoutes )
 
 //escuchar peticiones 
 app.listen(puerto, ()=> {
