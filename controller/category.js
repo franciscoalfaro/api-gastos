@@ -96,7 +96,7 @@ const actualizarCategoria = async (req, res) => {
     try {
         // Buscar la categoría por su nombre
         const categoriaExistente = await Category.findOne({ name });
-        console.log(categoriaExistente)
+
 
         // Si existe una categoría con el mismo nombre y un ID diferente al de la categoría que se está actualizando
         if (categoriaExistente && categoriaExistente._id.toString() !== id) {

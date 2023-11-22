@@ -314,7 +314,7 @@ const upload = async (req, res) => {
     if (!req.file) {
         return res.status(404).send({
             status: "error",
-            message: "image no seleccionada"
+            message: "imagen no seleccionada"
         })
     }
 
