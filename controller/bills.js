@@ -7,6 +7,7 @@ const mongoosePagination = require('mongoose-paginate-v2')
 const User = require("../models/user")
 const Category = require("../models/category")
 const Bill = require("../models/bills")
+const Saldo = require("../models/saldo")
 
 //importar servicio
 const validateGasto = require("../helpers/validateGasto")
@@ -66,6 +67,22 @@ const gasto = async (req, res) => {
             categoria: categoriaExistente._id // Asigna el ID de la categoría existente o recién creada
         });
 
+        // Restar el valor del gasto al saldo del usuario
+        const usuarioId = req.user.id; // Suponiendo que tienes el ID del usuario en el token
+        console.log(usuarioId)
+        const saldoUsuario = await Saldo.findOne({ userId: usuarioId }); // Buscar el saldo del usuario
+        console.log(saldoUsuario)
+
+        if (saldoUsuario) {
+            saldoUsuario.montoMensual -= params.valor; // Restar el valor del gasto al saldo
+            await saldoUsuario.save(); // Guardar el saldo actualizado
+        } else {
+            return res.status(404).json({
+                status: 'error',
+                message: 'No se encontró el saldo del usuario'
+            });
+        }
+
         return res.status(201).json({
             status: "success",
             message: "Gasto guardado de forma correcta",
@@ -81,9 +98,10 @@ const gasto = async (req, res) => {
     }
 }
 
+
 //end-point para actualizar gasto
 
-const update =  async (req, res)=>{
+const update = async (req, res) => {
     const { id } = req.params; // ID del gasto a actualizar
     const { name, description, cantidad, valor, categoria } = req.body; // Nuevos datos del gasto
 
@@ -136,7 +154,7 @@ const update =  async (req, res)=>{
 
 //end-point para eliminar gasto
 
-const remove = async(req, res)=>{
+const remove = async (req, res) => {
     try {
         //se obtiene el id por parametro
         const GastoId = req.params.id
@@ -155,20 +173,20 @@ const remove = async(req, res)=>{
             message: 'Gasto eliminado correctamente',
             gasto: gastoDelete
         });
-        
+
     } catch (error) {
         return res.status(500).json({
             status: 'error',
             message: 'Error al eliminar el gasto',
             error: error.message
         });
-        
+
     }
 
 }
 
 
-module.exports={
+module.exports = {
     gasto,
     update,
     remove

@@ -23,10 +23,12 @@ app.use(express.urlencoded({extended:true}));
 const UserRoutes = require("./routes/user")
 const CategoryRoutes = require("./routes/category")
 const BillsRoutes = require("./routes/bills")
+const SaldoRoutes = require("./routes/saldo")
 
 app.use("/api/user" ,UserRoutes)
 app.use("/api/bills",BillsRoutes)
 app.use("/api/category",CategoryRoutes )
+app.use("/api/saldo", SaldoRoutes)
 
 //escuchar peticiones 
 app.listen(puerto, ()=> {
