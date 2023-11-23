@@ -133,7 +133,11 @@ const listarSaldo = async (req, res) => {
             return res.status(200).send({
                 status: "success",
                 message: "listado de saldos",
-                total
+                total:total.docs,
+                totalDocs: total.totalDocs,
+                itempage: total.limit,
+                page:total.page
+            
 
     
             })
