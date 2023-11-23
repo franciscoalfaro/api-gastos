@@ -1,7 +1,7 @@
 const {Schema, model} = require("mongoose")
 const mongoosePaginate = require('mongoose-paginate-v2');
 
-const BillsySchema = Schema({
+const BillSchema = Schema({
     name:{
         type:String,
         require:true
@@ -32,7 +32,7 @@ const BillsySchema = Schema({
 
 })
 
-BillsySchema.plugin(mongoosePaginate);
+BillSchema.plugin(mongoosePaginate);
 
 
-module.exports = model("Bills", BillsySchema, "bills")
+module.exports = model("Bills", BillSchema, "bills")
