@@ -1,38 +1,38 @@
-const {Schema, model} = require("mongoose")
+const { Schema, model } = require("mongoose");
 const mongoosePaginate = require('mongoose-paginate-v2');
 
 const BillSchema = Schema({
-    name:{
-        type:String,
-        require:true
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     },
-    description:{
-        type:String,
-        required:true
+    name: {
+        type: String,
+        required: true
     },
-    cantidad:{
-        type:Number,
-        required:true
+    description: {
+        type: String,
+        required: true
     },
-    valor:{
-        type:Number,
-        required:true
+    cantidad: {
+        type: Number,
+        required: true
     },
-    
-    categoria:{
-        type:Schema.ObjectId,
-        ref:"Category"
-
+    valor: {
+        type: Number,
+        required: true
     },
-    create_at:{
-        type:Date,
-        default:Date.now
-
+    categoria: {
+        type: Schema.Types.ObjectId,
+        ref: "Category"
+    },
+    create_at: {
+        type: Date,
+        default: Date.now
     }
-
-})
+});
 
 BillSchema.plugin(mongoosePaginate);
 
-
-module.exports = model("Bills", BillSchema, "bills")
+module.exports = model("Bills", BillSchema, "bills");

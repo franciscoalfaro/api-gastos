@@ -18,21 +18,26 @@ const crearCategoria = async (req, res) => {
             message: "Faltan datos por enviar"
         });
     }
+
     try {
-        // Comprobar si la categoría ya existe por su nombre
-        const categoriaExistente = await Category.findOne({ name: params.name });
+        // Obtener el userId del usuario autenticado desde el token
+        const userId = req.user.id;
+
+        // Comprobar si la categoría ya existe por su nombre para el usuario actual
+        const categoriaExistente = await Category.findOne({ name: params.name, userId: userId });
 
         if (categoriaExistente) {
             return res.status(409).json({
                 status: "error",
-                message: "La categoría ya existe"
+                message: "La categoría ya existe para este usuario"
             });
         }
 
-        // Si la categoría no existe, crearla
+        // Si la categoría no existe para el usuario actual, crearla asociada a ese usuario
         const nuevaCategoria = await Category.create({
             name: params.name,
-            description: params.description
+            description: params.description,
+            userId: userId // Asociar la categoría al usuario actual
         });
 
         return res.status(201).json({
@@ -48,32 +53,37 @@ const crearCategoria = async (req, res) => {
             error: error.message
         });
     }
-
-
 }
+
 
 
 const eliminarCategoria = async (req, res) => {
     try {
         const categoriaId = req.params.id;
-        
-        // Buscar la categoría por su ID
-        const categoriaEliminar = await Category.findById(categoriaId);
+        const userId = req.user.id; // Obtener el ID del usuario autenticado desde el token
+
+        // Buscar la categoría por su ID y el usuario que la creó
+        const categoriaEliminar = await Category.findOne({ _id: categoriaId, userId: userId });
 
         if (!categoriaEliminar) {
             return res.status(404).json({
                 status: 'error',
-                message: 'La categoría no fue encontrada'
+                message: 'La categoría no fue encontrada o no tiene permisos para eliminarla'
             });
         }
 
-        // Encontrar la categoría predeterminada (por ejemplo, "Sin Categoría")
-        const categoriaPredeterminada = await Category.findOne({ name: 'Sin Categoría' });
+        // Encontrar la categoría predeterminada (por ejemplo, "Sin Categoría") asociada al usuario
+        let categoriaPredeterminada = await Category.findOne({ name: 'Sin Categoría', userId: userId });
+
+        // Si no se encuentra la categoría predeterminada, crearla asociada al usuario
+        if (!categoriaPredeterminada) {
+            categoriaPredeterminada = await Category.create({ name: 'Sin Categoría', userId: userId });
+        }
 
         // Actualizar los gastos asociados a la categoría que se eliminará
-        await Bill.updateMany({ categoria: categoriaId }, { categoria: categoriaPredeterminada._id });
+        await Bill.updateMany({ categoria: categoriaId, userId: userId }, { categoria: categoriaPredeterminada._id });
 
-        // Eliminar la categoría
+        // Eliminar la categoría asociada al usuario
         await Category.findByIdAndDelete(categoriaId);
 
         return res.status(200).json({
@@ -88,6 +98,8 @@ const eliminarCategoria = async (req, res) => {
         });
     }
 };
+
+
 
 const actualizarCategoria = async (req, res) => {
     const { id } = req.params; // ID de la categoría

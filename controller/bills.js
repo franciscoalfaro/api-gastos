@@ -15,7 +15,9 @@ const validateGasto = require("../helpers/validateGasto")
 
 //end-point para crear el gasto
 const gasto = async (req, res) => {
+
     let params = req.body;
+
 
     if (!params.name || !params.description || !params.cantidad || !params.valor || !params.categoria) {
         return res.status(400).json({
@@ -25,53 +27,33 @@ const gasto = async (req, res) => {
     }
 
     try {
+        // Obtener el userId del usuario autenticado desde el token
+        const userId = req.user.id;
+        console.log(userId)
+
         // Validar el gasto usando el servicio validateGasto
         validateGasto.validateGasto(params);
 
         // Buscar la categoría asociada al gasto
-        let categoriaExistente = await Category.findOne({ name: params.categoria });
+        let categoriaExistente = await Category.findOne({ userId, name: params.categoria });
 
         if (!categoriaExistente) {
             // Si la categoría no existe, crearla
-            categoriaExistente = await Category.create({ name: params.categoria });
+            categoriaExistente = await Category.create({ userId,  name: params.categoria });
         }
 
-        // Buscar un gasto similar en la base de datos
-        const gastoExistente = await Bill.findOne({
-            name: params.name,
-            description: params.description,
-            valor: params.valor,
-            categoria: categoriaExistente._id // Asigna el ID de la categoría existente o recién creada
-        });
-
-        if (gastoExistente) {
-            // Si existe, actualizar la cantidad del gasto existente
-            gastoExistente.cantidad = Number(gastoExistente.cantidad) + Number(params.cantidad);
-            gastoExistente.valor = Number(gastoExistente.valor) + Number(params.valor);
-            
-            await gastoExistente.save();
-
-            return res.status(200).json({
-                status: "success",
-                message: "Gasto actualizado correctamente",
-                gasto: gastoExistente
-            });
-        }
-
-        // Si no existe un gasto similar, crear uno nuevo
+        // Crear el nuevo gasto asociado al usuario
         const nuevoGasto = await Bill.create({
+            userId: userId, // Asociar el gasto al usuario actual
             name: params.name,
             description: params.description,
             cantidad: params.cantidad,
             valor: params.valor,
-            categoria: categoriaExistente._id // Asigna el ID de la categoría existente o recién creada
+            categoria: categoriaExistente._id // Asignar el ID de la categoría existente o recién creada
         });
 
         // Restar el valor del gasto al saldo del usuario
-        const usuarioId = req.user.id; // Suponiendo que tienes el ID del usuario en el token
-        console.log(usuarioId)
-        const saldoUsuario = await Saldo.findOne({ userId: usuarioId }); // Buscar el saldo del usuario
-        console.log(saldoUsuario)
+        const saldoUsuario = await Saldo.findOne({ userId: userId });
 
         if (saldoUsuario) {
             saldoUsuario.montoMensual -= params.valor; // Restar el valor del gasto al saldo

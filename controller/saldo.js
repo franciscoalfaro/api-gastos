@@ -1,6 +1,7 @@
 const mongoosePagination = require('mongoose-paginate-v2')
 
 const Saldo = require("../models/saldo")
+const Total = require("../models/total")
 
 const registrarSaldo = async (req, res) =>{
     const userId = req.user.id; 
@@ -9,6 +10,7 @@ const registrarSaldo = async (req, res) =>{
     try {
         // Verificar si ya existe un registro de saldo para el usuario en el mes y año dados
         const saldoExistente = await Saldo.findOne({ userId, mes, ano });
+        const saldoInicial = await Total.findOne({ userId, mes, ano });
 
         if (saldoExistente) {
             return res.status(409).json({
@@ -25,8 +27,18 @@ const registrarSaldo = async (req, res) =>{
             ano
         });
 
+        const saldoIniTotal = new Total({
+            userId,
+            montoMensual,
+            gastoUtilizado:0,
+            mes,
+            ano
+
+        })
+
         // Guardar el nuevo saldo en la base de datos
         await nuevoSaldo.save();
+        await saldoIniTotal.save()
 
         return res.status(201).json({
             status: 'success',
@@ -75,11 +87,12 @@ const actualizarSaldo = async (req, res) => {
 };
 
 const eliminarSaldo = async (req, res) => {
-    const { userId, mes, año } = req.body; // Datos del saldo a eliminar
+    const usuarioId = req.user.id; // ID del usuario autenticado desde el token
+    const { mes, año } = req.body; // Datos del saldo a eliminar (mes y año)
 
     try {
-        // Buscar y eliminar el registro de saldo para el usuario en el mes y año dados
-        const saldoEliminado = await Saldo.findOneAndDelete({ userId, mes, año });
+        // Buscar y eliminar el saldo del usuario identificado para el mes y año dados
+        const saldoEliminado = await Saldo.findOneAndDelete({ userId: usuarioId, mes, año });
 
         if (!saldoEliminado) {
             return res.status(404).json({
@@ -103,18 +116,18 @@ const eliminarSaldo = async (req, res) => {
 };
 
 
+
 //este end-poit es para listar el historico del saldo del usuario 
 
 const listarSaldo = async (req, res) => {
+    const usuarioId = req.user.id; // Obtener el ID del usuario autenticado desde el token
+    let page = 1;
 
-    let page = 1
     if (req.params.page) {
-        page = req.params.page
+        page = parseInt(req.params.page);
     }
 
-    page = parseInt(page)
-
-    let itemPerPage = 6
+    const itemPerPage = 6;
 
     const opciones = {
         page: page,
@@ -123,27 +136,25 @@ const listarSaldo = async (req, res) => {
         select: ("-password -email -role -__v")
     };
 
-
     try {
+        // Filtrar el saldo por el ID del usuario
+        const total = await Saldo.paginate({ userId: usuarioId }, opciones);
 
-        Saldo.paginate({}, opciones, async (error, total) => {
+        if (!total || total.docs.length === 0) {
+            return res.status(404).json({
+                status: "Error",
+                message: "No se encontró saldo para este usuario"
+            });
+        }
 
-            if (error || !total) return res.status(404).json({ status: "Error", message: "NO SE HA ENCONTRADO EL USUARIO" })
-    
-            return res.status(200).send({
-                status: "success",
-                message: "listado de saldos",
-                total:total.docs,
-                totalDocs: total.totalDocs,
-                itempage: total.limit,
-                page:total.page
-            
-
-    
-            })
-        })
-
-
+        return res.status(200).send({
+            status: "success",
+            message: "Listado de saldos del usuario",
+            total: total.docs,
+            totalDocs: total.totalDocs,
+            itempage: total.limit,
+            page: total.page
+        });
 
     } catch (error) {
         return res.status(500).json({
@@ -153,6 +164,7 @@ const listarSaldo = async (req, res) => {
         });
     }
 };
+
 
 
 module.exports = {

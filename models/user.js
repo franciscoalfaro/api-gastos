@@ -1,5 +1,6 @@
 const {Schema, model} = require("mongoose")
 const mongoosePaginate = require('mongoose-paginate-v2');
+const Category = require("./category")
 
 const UserSchema = Schema({
     name:{
@@ -43,6 +44,21 @@ const UserSchema = Schema({
     }
 
 })
+
+//hook para crear la categoria "sin categoria", para el nuevo usuario
+UserSchema.post('save', async function (user) {
+    try {
+        // Verificar si ya existe la categoría 'Sin Categoría' asociada a este usuario
+        const sinCategoria = await Category.findOne({ name: 'Sin Categoría', userId: user._id });
+
+        // Si no existe, crearla
+        if (!sinCategoria) {
+            await Category.create({ name: 'Sin Categoría', userId: user._id });
+        }
+    } catch (error) {
+        console.error('Error al crear la categoría predeterminada:', error);
+    }
+});
 
 UserSchema.plugin(mongoosePaginate);
 

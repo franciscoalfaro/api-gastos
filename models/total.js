@@ -8,6 +8,10 @@ const TotalSchema = Schema({
         required:true
 
     },
+    montoMensual:{
+        type:Number,
+        required:true
+    },
     gastoUtilizado:{
         type:Number,
         required:true
