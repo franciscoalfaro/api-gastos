@@ -1,9 +1,11 @@
+require('dotenv').config();
+
 //importar dependencias 
 const jwt = require("jwt-simple")
 const moment =  require("moment")
 
 //clave secreta
-const secret_key = "SECRET_KEY_PROYECT_010102";
+const secret_key = process.env.SECRET_KEY;
 
 // crear funcion para genera tokens
 const createToken = (user)=>{
