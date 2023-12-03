@@ -39,7 +39,7 @@ const generarTotalGastos = async (req, res) => {
 
     try {
         // Encontrar el saldo inicial del usuario
-        const saldoInicial = await Saldo.findOne({ userId, mes, ano });
+        const saldoInicial = await Total.findOne({ userId, mes, ano });
 
         if (!saldoInicial) {
             return res.status(404).json({

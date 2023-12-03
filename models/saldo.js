@@ -13,6 +13,12 @@ const SaldoSchema = Schema({
         type:Number,
         required:true
     },
+    tope1:{
+        type:Number
+    },
+    tope2:{
+        type:Number
+    },
     mes:{
         type:Number,
         required:true

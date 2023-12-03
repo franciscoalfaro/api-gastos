@@ -7,7 +7,8 @@ const connection = async()=>{
         
     } catch (error) {
         console.log(error);
-        throw new Error("The connection has been refused..");
+        console.log('Intentando nuevamente la conexión en 5 segundos...');
+        setTimeout(connection, 5000);
         
     }
 }

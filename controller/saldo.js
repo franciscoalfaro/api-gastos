@@ -5,7 +5,7 @@ const Total = require("../models/total")
 
 const registrarSaldo = async (req, res) =>{
     const userId = req.user.id; 
-    const { montoMensual, mes, ano } = req.body; // Datos del saldo a crear
+    const { montoMensual, mes,tope1,tope2, ano } = req.body; // Datos del saldo a crear
 
     try {
         // Verificar si ya existe un registro de saldo para el usuario en el mes y año dados
@@ -23,6 +23,8 @@ const registrarSaldo = async (req, res) =>{
         const nuevoSaldo = new Saldo({
             userId,
             montoMensual,
+            tope1,
+            tope2,
             mes,
             ano
         });
@@ -55,7 +57,8 @@ const registrarSaldo = async (req, res) =>{
 }
 
 const actualizarSaldo = async (req, res) => {
-    const { userId, montoMensual, mes, año } = req.body; // Nuevos datos del saldo a actualizar
+    const userId = req.user.id;
+    const { montoMensual, mes, año, tope1, tope2 } = req.body; // Nuevos datos del saldo a actualizar
 
     try {
         // Verificar si ya existe un registro de saldo para el usuario en el mes y año dados
@@ -70,6 +73,13 @@ const actualizarSaldo = async (req, res) => {
 
         // Actualizar el registro de saldo existente
         saldoExistente.montoMensual = montoMensual;
+        // Verificar y actualizar los campos opcionales
+        if (tope1 !== undefined) {
+            saldoExistente.tope1 = tope1;
+        }
+        if (tope2 !== undefined) {
+            saldoExistente.tope2 = tope2;
+        }
         await saldoExistente.save();
 
         return res.status(200).json({
@@ -85,6 +95,7 @@ const actualizarSaldo = async (req, res) => {
         });
     }
 };
+
 
 const eliminarSaldo = async (req, res) => {
     const usuarioId = req.user.id; // ID del usuario autenticado desde el token
@@ -118,7 +129,6 @@ const eliminarSaldo = async (req, res) => {
 
 
 //este end-poit es para listar el historico del saldo del usuario 
-
 const listarSaldo = async (req, res) => {
     const usuarioId = req.user.id; // Obtener el ID del usuario autenticado desde el token
     let page = 1;
