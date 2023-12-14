@@ -167,9 +167,49 @@ const remove = async (req, res) => {
 
 }
 
+//listar los ultimos 30 gastos del mes en curso
+const listarUltimosGastos = async (req, res) => {
+    const userId = req.user.id; // ID del usuario obtenido del token
+    console.log(userId)
+    const { page = 1, limit = 30 } = req.query;
+
+    const currentDate = new Date();
+    const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+
+    try {
+        const options = {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            sort: { create_at: -1 },
+        };
+
+        // Filtrar los gastos por el mes actual
+        const gastos = await Bill.paginate(
+            { userId, create_at: { $gte: firstDayOfMonth, $lte: lastDayOfMonth } },
+            options
+        );
+
+        return res.status(200).json({
+            status: 'success',
+            message: 'Lista de gastos del mes actual',
+            gastos: gastos.docs,
+            totalPages: gastos.totalPages,
+            currentPage: gastos.page,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 'error',
+            message: 'Error al listar los gastos',
+            error: error.message,
+        });
+    }
+};
+
 
 module.exports = {
     gasto,
     update,
-    remove
+    remove,
+    listarUltimosGastos
 }

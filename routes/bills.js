@@ -7,5 +7,6 @@ const check = require("../middlewares/auth")
 router.post("/creargasto",check.auth, BillController.gasto)
 router.put("/update/:id",check.auth, BillController.update)
 router.delete("/delete/:id",check.auth, BillController.remove)
+router.get("/ultimosgastos",check.auth, BillController.listarUltimosGastos)
 
 module.exports=router

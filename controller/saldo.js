@@ -3,14 +3,13 @@ const mongoosePagination = require('mongoose-paginate-v2')
 const Saldo = require("../models/saldo")
 const Total = require("../models/total")
 
-const registrarSaldo = async (req, res) =>{
-    const userId = req.user.id; 
-    const { montoMensual, mes,tope1,tope2, ano } = req.body; // Datos del saldo a crear
+const registrarSaldo = async (req, res) => {
+    const userId = req.user.id;
+    const { montoMensual, mes, tope1, tope2, ano } = req.body; // Datos del saldo a crear
 
     try {
         // Verificar si ya existe un registro de saldo para el usuario en el mes y año dados
         const saldoExistente = await Saldo.findOne({ userId, mes, ano });
-        const saldoInicial = await Total.findOne({ userId, mes, ano });
 
         if (saldoExistente) {
             return res.status(409).json({
@@ -32,7 +31,7 @@ const registrarSaldo = async (req, res) =>{
         const saldoIniTotal = new Total({
             userId,
             montoMensual,
-            gastoUtilizado:0,
+            gastoUtilizado: 0,
             mes,
             ano
 
@@ -45,7 +44,8 @@ const registrarSaldo = async (req, res) =>{
         return res.status(201).json({
             status: 'success',
             message: 'Saldo creado correctamente',
-            saldo: nuevoSaldo
+            saldo: nuevoSaldo,
+            saldoInicial: saldoIniTotal
         });
     } catch (error) {
         return res.status(500).json({
@@ -175,11 +175,36 @@ const listarSaldo = async (req, res) => {
     }
 };
 
+const saldoActual = async (req, res) => {
+    const usuarioId = req.user.id;
+    console.log(usuarioId)
+
+    try {
+        const saldoUser = await Saldo.findOne({ userId: usuarioId })
+    
+        return res.status(200).send({
+            status: "success",
+            message: "monto actual",
+            saldoUser,
+
+
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 'error',
+            message: 'Error al listar el saldo',
+            error: error.message
+        });
+    }
+
+}
+
 
 
 module.exports = {
     registrarSaldo,
     actualizarSaldo,
     eliminarSaldo,
-    listarSaldo
+    listarSaldo,
+    saldoActual
 }
