@@ -7,6 +7,8 @@ const registrarSaldo = async (req, res) => {
     const userId = req.user.id;
     const { montoMensual, mes, tope1, tope2, ano } = req.body; // Datos del saldo a crear
 
+    console.log(req.body)
+
     try {
         // Verificar si ya existe un registro de saldo para el usuario en el mes y año dados
         const saldoExistente = await Saldo.findOne({ userId, mes, ano });
@@ -177,27 +179,36 @@ const listarSaldo = async (req, res) => {
 
 const saldoActual = async (req, res) => {
     const usuarioId = req.user.id;
-    console.log(usuarioId)
 
     try {
-        const saldoUser = await Saldo.findOne({ userId: usuarioId })
-    
-        return res.status(200).send({
-            status: "success",
-            message: "monto actual",
-            saldoUser,
+        // Buscar los saldos del usuario, ordenados por fecha descendente
+        const saldosUsuario = await Saldo.find({ userId: usuarioId })
+            .sort({ create_at: -1 })
+            .limit(1);
 
+        if (!saldosUsuario || saldosUsuario.length === 0) {
+            return res.status(404).json({
+                status: 'error',
+                message: 'No se encontró saldo para el usuario',
+            });
+        }
 
+        const saldoActual = saldosUsuario[0]; // Tomar el primer saldo (el más reciente)
+
+        return res.status(200).json({
+            status: 'success',
+            message: 'Saldo actual encontrado',
+            saldoUser:saldoActual,
         });
     } catch (error) {
         return res.status(500).json({
             status: 'error',
-            message: 'Error al listar el saldo',
-            error: error.message
+            message: 'Error al listar el saldo actual',
+            error: error.message,
         });
     }
+};
 
-}
 
 
 

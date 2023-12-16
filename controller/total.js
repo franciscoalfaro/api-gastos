@@ -7,12 +7,9 @@ const Saldo = require("../models/saldo")
 const obtenerTotalPorMesYAno = async (req, res) => {
     const usuarioId = req.user.id; // Suponiendo que tienes el ID del usuario en el token
 
-    const { mes, ano } = req.body; // Mes y año proporcionados en la URL
-    
-
     try {
         // Buscar el total utilizado por el usuario en el mes y año dados
-        const totalUsuario = await Total.findOne({ userId: usuarioId, mes, ano });
+        const totalUsuario = await Total.findOne({ userId: usuarioId});
 
         if (!totalUsuario) {
             return res.status(404).json({
@@ -23,7 +20,9 @@ const obtenerTotalPorMesYAno = async (req, res) => {
 
         return res.status(200).json({
             status: 'success',
-            total: totalUsuario
+            totalUsuario,
+            monto_mensual:totalUsuario.montoMensual,
+            monto_utilizado:totalUsuario.gastoUtilizado
         });
     } catch (error) {
         return res.status(500).json({
@@ -36,10 +35,14 @@ const obtenerTotalPorMesYAno = async (req, res) => {
 
 //generar el total de gastos se debe de generar este end-point para que se refleje en el ultimo 12 meses
 const generarTotalGastos = async (req, res) => {
-    const { mes, ano } = req.body;
+
     const userId = req.user.id;
 
     try {
+        const currentDate = new Date();
+        const mes = currentDate.getMonth() + 1; // El mes actual
+        const ano = currentDate.getFullYear(); // El año actual
+        
         // Encontrar el saldo inicial del usuario
         const saldoInicial = await Total.findOne({ userId, mes, ano });
 
@@ -70,7 +73,7 @@ const generarTotalGastos = async (req, res) => {
             total: {
                 saldoInicial: saldoInicial.montoMensual,
                 gastoUtilizado: totalGastos
-                // Puedes agregar más detalles del total si es necesario
+                
             }
         });
     } catch (error) {
@@ -86,7 +89,6 @@ const generarTotalGastos = async (req, res) => {
 //obtener los ultimos 12 meses de gastos
 const obtenerConsumosUltimos12Meses = async (req, res) => {
     const userId = req.user.id; // ID del usuario obtenido del token
-
 
     try {
         // Obtener la fecha actual

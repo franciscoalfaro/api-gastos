@@ -143,7 +143,7 @@ const profile = async (req, res) => {
     try {
         const userProfile = await User.findById(id)
         User.findById(userProfile)
-        .select({ "password": 0, "role": 0, "create_at": 0 })
+        .select({ "password": 0, "role": 0 })
         .then(async (userProfile) => {
             if (!userProfile) return res.status(404).json({ status: "Error", message: "NO SE HA ENCONTRADO EL USUARIO" })
 
