@@ -1,8 +1,10 @@
 const mongoose = require('mongoose')
+require('dotenv').config();
 
 const connection = async()=>{
     try {
-        await mongoose.connect("mongodb://localhost:27017/dbGastos")
+        //await mongoose.connect("mongodb://localhost:27017/dbGastos")
+        await mongoose.connect(process.env.MONGODB_URI,)
         console.log("Connection success BD Gastos")
         
     } catch (error) {
