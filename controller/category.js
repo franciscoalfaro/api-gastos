@@ -12,7 +12,7 @@ const Bill = require("../models/bills")
 const crearCategoria = async (req, res) => {
     let params = req.body;
 
-    if (!params.name || !params.description ) {
+    if (!params.name) {
         return res.status(400).json({
             status: "Error",
             message: "Faltan datos por enviar"

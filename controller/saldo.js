@@ -7,16 +7,26 @@ const registrarSaldo = async (req, res) => {
     const userId = req.user.id;
     const { montoMensual, mes, tope1, tope2, ano } = req.body; // Datos del saldo a crear
 
-    console.log(req.body)
+  
 
     try {
         // Verificar si ya existe un registro de saldo para el usuario en el mes y año dados
         const saldoExistente = await Saldo.findOne({ userId, mes, ano });
+        const saldoExistenteTotal = await Total.findOne({ userId, mes, ano });
 
-        if (saldoExistente) {
-            return res.status(409).json({
-                status: 'error',
-                message: 'Ya existe un saldo para el usuario en el mes y año dados'
+        if (saldoExistente && saldoExistenteTotal) {
+            // Si hay un saldo existente para el mes y año actual, se suma el monto mensual al saldo actual
+            saldoExistente.montoMensual = parseInt(saldoExistente.montoMensual) + parseInt(montoMensual);
+            saldoExistenteTotal.montoMensual = parseInt(saldoExistenteTotal.montoMensual) + parseInt(montoMensual);
+            await saldoExistente.save();
+            await saldoExistenteTotal.save()
+
+            return res.status(200).json({
+                status: 'success',
+                message: 'Se ha actualizado el saldo existente',
+                saldo: saldoExistente,
+                total:saldoExistenteTotal
+
             });
         }
 
