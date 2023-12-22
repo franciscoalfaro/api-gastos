@@ -154,7 +154,7 @@ const obtenerDetalleGastos = async (req, res) => {
             });
 
             detalleGastos.push({
-                mes: primerDiaMes.toLocaleString('default', { month: 'long' }),
+                mes: primerDiaMes.toLocaleString('es-ES', { month: 'long' }),
                 ano: primerDiaMes.getFullYear(),
                 totalGastos: gastosMes.reduce((total, gasto) => total + gasto.valor, 0),
                 gastos: gastosMes
