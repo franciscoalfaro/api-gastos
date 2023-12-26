@@ -23,6 +23,9 @@ const BillSchema = Schema({
         type: Number,
         required: true
     },
+    fechagasto:{
+        type:Date,
+    },
     categoria: {
         type: Schema.Types.ObjectId,
         ref: "Category"

@@ -17,9 +17,9 @@ const validateGasto = require("../helpers/validateGasto")
 const gasto = async (req, res) => {
 
     let params = req.body;
-
-
-    if (!params.name || !params.description || !params.cantidad || !params.valor || !params.categoria) {
+    console.log(params)
+    
+    if (!params.name || !params.description || !params.cantidad || !params.valor || !params.categoria || !params.fechagasto) {
         return res.status(400).json({
             status: "Error",
             message: "Faltan datos por enviar"
@@ -33,6 +33,7 @@ const gasto = async (req, res) => {
 
         // Validar el gasto usando el servicio validateGasto
         validateGasto.validateGasto(params);
+
 
         // Buscar la categoría asociada al gasto
         let categoriaExistente = await Category.findOne({ userId, name: params.categoria });
@@ -49,6 +50,7 @@ const gasto = async (req, res) => {
             description: params.description,
             cantidad: params.cantidad,
             valor: params.valor,
+            fechagasto:params.fechagasto,
             categoria: categoriaExistente._id // Asignar el ID de la categoría existente o recién creada
         });
 
@@ -85,7 +87,7 @@ const gasto = async (req, res) => {
 
 const update = async (req, res) => {
     const { id } = req.params; // ID del gasto a actualizar
-    const { name, description, cantidad, valor, categoria } = req.body; // Nuevos datos del gasto
+    const { name, description, cantidad, valor, categoria, fechagasto } = req.body; // Nuevos datos del gasto
     console.log(id)
 
     try {
@@ -115,6 +117,7 @@ const update = async (req, res) => {
         gastoExistente.description = description || gastoExistente.description;
         gastoExistente.cantidad = cantidad || gastoExistente.cantidad;
         gastoExistente.valor = valor || gastoExistente.valor;
+        gastoExistente.fechagasto = fechagasto || gastoExistente.fechagasto
         gastoExistente.categoria = categoriaExistente._id; // Asignar el ID de la categoría encontrada
 
         // Guardar los cambios en la base de datos
@@ -169,7 +172,7 @@ const remove = async (req, res) => {
 
 }
 
-//listar los ultimos 30 gastos del mes en curso
+//listar los ultimos 30/10/5 gastos del mes en curso
 const listarUltimosGastos = async (req, res) => {
     const userId = req.user.id; // ID del usuario obtenido del token
    
