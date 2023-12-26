@@ -86,10 +86,12 @@ const gasto = async (req, res) => {
 const update = async (req, res) => {
     const { id } = req.params; // ID del gasto a actualizar
     const { name, description, cantidad, valor, categoria } = req.body; // Nuevos datos del gasto
+    console.log(id)
 
     try {
         // Buscar la categoría por su nombre
         const categoriaExistente = await Category.findOne({ name: categoria });
+        console.log(categoriaExistente)
 
         if (!categoriaExistente) {
             return res.status(404).json({
@@ -171,7 +173,11 @@ const remove = async (req, res) => {
 const listarUltimosGastos = async (req, res) => {
     const userId = req.user.id; // ID del usuario obtenido del token
    
-    const { page = 1, limit = 30 } = req.query;
+    let page = 1
+    if (req.params.page) {
+        page = req.params.page
+    }
+    let itemsPerPage = 5
 
     const currentDate = new Date();
     const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
@@ -179,8 +185,8 @@ const listarUltimosGastos = async (req, res) => {
 
     try {
         const options = {
-            page: parseInt(page),
-            limit: parseInt(limit),
+            page: page,
+            limit: itemsPerPage,
             sort: { create_at: -1 },
         };
 
@@ -195,7 +201,9 @@ const listarUltimosGastos = async (req, res) => {
             message: 'Lista de gastos del mes actual',
             gastos: gastos.docs,
             totalPages: gastos.totalPages,
-            currentPage: gastos.page,
+            page:gastos.page,
+            
+            
         });
     } catch (error) {
         return res.status(500).json({
@@ -245,11 +253,50 @@ const listarUltimos10 = async (req, res) => {
 };
 
 
+const listarUltimos5 = async (req, res) => {
+    const userId = req.user.id;
+    const { page = 1, limit = 5 } = req.query;
+
+    const currentDate = new Date();
+    const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+
+    try {
+        const options = {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            sort: { create_at: -1 },
+            populate: 'categoria', // Aquí especificamos el campo para poblar
+        };
+
+        const gastos = await Bill.paginate(
+            { userId, create_at: { $gte: firstDayOfMonth, $lte: lastDayOfMonth } },
+            options
+        );
+
+        return res.status(200).json({
+            status: 'success',
+            message: 'Lista de gastos del mes actual',
+            gastos: gastos.docs,
+            totalPages: gastos.totalPages,
+            currentPage: gastos.page,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 'error',
+            message: 'Error al listar los gastos',
+            error: error.message,
+        });
+    }
+};
+
+
 
 module.exports = {
     gasto,
     update,
     remove,
     listarUltimosGastos,
-    listarUltimos10
+    listarUltimos10,
+    listarUltimos5
 }

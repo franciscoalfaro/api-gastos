@@ -70,13 +70,16 @@ const registrarSaldo = async (req, res) => {
 
 const actualizarSaldo = async (req, res) => {
     const userId = req.user.id;
-    const { montoMensual, mes, año, tope1, tope2 } = req.body; // Nuevos datos del saldo a actualizar
+    const { montoMensual, mes, ano, tope1, tope2 } = req.body; // Nuevos datos del saldo a actualizar
+    
 
     try {
         // Verificar si ya existe un registro de saldo para el usuario en el mes y año dados
-        const saldoExistente = await Saldo.findOne({ userId, mes, año });
+        const saldoExistente = await Saldo.findOne({ userId, mes, ano });
+        const saldoExistenteTotal = await Total.findOne({ userId, mes, ano });
 
-        if (!saldoExistente) {
+
+        if (!saldoExistente && !saldoExistenteTotal) {
             return res.status(404).json({
                 status: 'error',
                 message: 'No se encontró un saldo para el usuario en el mes y año dados'
@@ -85,6 +88,7 @@ const actualizarSaldo = async (req, res) => {
 
         // Actualizar el registro de saldo existente
         saldoExistente.montoMensual = montoMensual;
+        saldoExistenteTotal.montoMensual = montoMensual
         // Verificar y actualizar los campos opcionales
         if (tope1 !== undefined) {
             saldoExistente.tope1 = tope1;
@@ -93,11 +97,13 @@ const actualizarSaldo = async (req, res) => {
             saldoExistente.tope2 = tope2;
         }
         await saldoExistente.save();
+        await saldoExistenteTotal.save();
 
         return res.status(200).json({
             status: 'success',
             message: 'Saldo actualizado correctamente',
-            saldo: saldoExistente
+            saldo: saldoExistente,
+            saldo2:saldoExistenteTotal
         });
     } catch (error) {
         return res.status(500).json({
