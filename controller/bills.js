@@ -301,6 +301,46 @@ const listarUltimos5 = async (req, res) => {
     }
 };
 
+//generar end-point para obtener el detalle de lo que ga
+const obtenerDetalleGastos = async (req, res) => {
+    const userId = req.user.id;
+
+    try {
+        const fechaActual = new Date();
+        const detalleGastos = [];
+
+        // Obtener el detalle de gastos para los últimos 6 meses
+        for (let i = 0; i < 6; i++) {
+            const primerDiaMes = new Date(fechaActual.getFullYear(), fechaActual.getMonth() - i, 1);
+            const ultimoDiaMes = new Date(fechaActual.getFullYear(), fechaActual.getMonth() - i + 1, 0);
+
+            const gastosMes = await Bill.find({
+                userId: userId,
+                fechagasto: { $gte: primerDiaMes, $lte: ultimoDiaMes }
+            });
+
+            detalleGastos.push({
+                mes: primerDiaMes.toLocaleString('es-ES', { month: 'long' }),
+                ano: primerDiaMes.getFullYear(),
+                totalGastos: gastosMes.reduce((total, gasto) => total + gasto.valor, 0),
+                gastos: gastosMes
+            });
+        }
+
+        return res.status(200).json({
+            status: 'success',
+            message: 'Detalle de gastos de los últimos 6 meses obtenido correctamente',
+            detalleGastos
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 'error',
+            message: 'Error al obtener el detalle de gastos de los últimos 6 meses',
+            error: error.message
+        });
+    }
+};
+
 
 
 module.exports = {
@@ -309,5 +349,6 @@ module.exports = {
     remove,
     listarUltimosGastos,
     listarUltimos10,
-    listarUltimos5
+    listarUltimos5,
+    obtenerDetalleGastos
 }
