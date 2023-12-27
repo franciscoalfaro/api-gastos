@@ -9,8 +9,8 @@ const connection = async()=>{
         
     } catch (error) {
         console.log(error);
-        console.log('Intentando nuevamente la conexión en 5 segundos...');
-        setTimeout(connection, 5000);
+        console.log('Intentando nuevamente la conexión en 2 segundos...');
+        setTimeout(connection, 2000);
         
     }
 }

@@ -15,12 +15,11 @@ const validateGasto = (params) => {
         validator.isNumeric(params.valor, { min: 1, max: undefined })
         
 
-    let fechagasto = !validator.isEmpty(params.fechagasto) && !validator.isDate(params.fechagasto,{format: 'DD/MM/YYYY',});
+    let fechagasto = !validator.isEmpty(params.fechagasto) && !validator.isDate(params.fechagasto,{format: 'DD/MM/YYYY'});
    
 
     let categoria = !validator.isEmpty(params.categoria) &&
-        validator.isLength(params.categoria, { min: 3, max: undefined }) &&
-        validator.isAlpha(params.categoria, "es-ES")
+        validator.isLength(params.categoria, { min: 3, max: undefined })
 
 
     if (!name || !description || !cantidad || !valor  || !fechagasto || !categoria) {

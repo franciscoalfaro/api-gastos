@@ -35,55 +35,65 @@ const obtenerTotalPorMesYAno = async (req, res) => {
 
 //generar el total de gastos se debe de generar este end-point para que se refleje en el ultimo 12 meses
 const generarTotalGastos = async (req, res) => {
-
     const userId = req.user.id;
-
+  
     try {
-        const currentDate = new Date();
-        const mes = currentDate.getMonth() + 1; // El mes actual
-        const ano = currentDate.getFullYear(); // El año actual
-        
-        // Encontrar el saldo inicial del usuario
-        const saldoInicial = await Total.findOne({ userId, mes, ano });
-
-        if (!saldoInicial) {
-            return res.status(404).json({
-                status: 'error',
-                message: 'No se encontró el saldo inicial del usuario'
-            });
-        }
-
-        // Buscar los gastos asociados al usuario para el mes y año dados
+      const currentDate = new Date();
+      const currentMonth = currentDate.getMonth() + 1; // Mes actual
+      const currentYear = currentDate.getFullYear(); // Año actual
+  
+      let totalGastos = 0;
+      let saldoInicial = null;
+  
+      // Recorrer desde enero hasta el mes actual para calcular los gastos
+      for (let month = 1; month <= currentMonth; month++) {
+        // Mostrar el mes actual en el console.log
+        console.log('Procesando el mes:', month);
+  
+        // Encontrar el saldo inicial del usuario para el mes y año actuales del bucle
+        saldoInicial = await Total.findOne({ userId, mes: month, ano: currentYear });
+  
+        // Si no hay saldo inicial, se salta al siguiente mes
+        if (!saldoInicial) continue;
+  
+        // Buscar los gastos asociados al usuario para el mes y año actuales del bucle
         const gastos = await Bill.find({
-            userId: userId,
-            create_at: { $gte: new Date(ano, mes - 1, 1), $lt: new Date(ano, mes, 1) }
+          userId: userId,
+          fechagasto: { $gte: new Date(currentYear, month - 1, 1), $lt: new Date(currentYear, month, 1) }
         });
-
-        // Calcular el total de gastos sumando los valores de los gastos encontrados
-        const totalGastos = gastos.reduce((total, gasto) => total + gasto.valor, 0);
-
-        // Crear o actualizar el registro de Total de Gastos
-        // ... (código de creación/actualización de Total de Gastos)
-        saldoInicial.gastoUtilizado = totalGastos;
+  
+        // Si es el mes actual, calcular el total de gastos para este mes
+        if (month === currentMonth) {
+          totalGastos = gastos.reduce((total, gasto) => total + gasto.valor, 0);
+        }
+  
+        // Calcular el total de gastos para este mes y sumarlo al total general
+        const totalGastosMes = gastos.reduce((total, gasto) => total + gasto.valor, 0);
+  
+        // Actualizar el saldo inicial con el gasto utilizado para este mes
+        saldoInicial.gastoUtilizado = totalGastosMes;
         await saldoInicial.save();
-
-        return res.status(200).json({
-            status: 'success',
-            message: 'Total de gastos generado correctamente',
-            total: {
-                saldoInicial: saldoInicial.montoMensual,
-                gastoUtilizado: totalGastos
-                
-            }
-        });
+      }
+  
+      return res.status(200).json({
+        status: 'success',
+        message: 'Total de gastos generado correctamente',
+        total: {
+          saldoInicial: saldoInicial ? saldoInicial.montoMensual : 0,
+          gastoUtilizado: totalGastos,
+          saldoActual: (saldoInicial ? saldoInicial.montoMensual : 0) - totalGastos // Calcular el saldo actual
+        }
+      });
     } catch (error) {
-        return res.status(500).json({
-            status: 'error',
-            message: 'Error al generar el total de gastos',
-            error: error.message
-        });
+      return res.status(500).json({
+        status: 'error',
+        message: 'Error al generar el total de gastos',
+        error: error.message
+      });
     }
-};
+  };
+  
+  
 
 
 //obtener los ultimos 12 meses de gastos
@@ -117,7 +127,7 @@ const obtenerConsumosUltimos12Meses = async (req, res) => {
         // Obtener los gastos hasta la fecha actual
         const gastos = await Bill.find({
             userId: userId,
-            create_at: { $lt: new Date(currentYear, currentMonth, 1) }
+            fechagasto: { $lt: new Date(currentYear, currentMonth, 1) }
         });
         const totalGastosHastaFechaActual = gastos.reduce((total, gasto) => total + gasto.valor, 0);
 
@@ -150,7 +160,7 @@ const obtenerDetalleGastos = async (req, res) => {
 
             const gastosMes = await Bill.find({
                 userId: userId,
-                create_at: { $gte: primerDiaMes, $lte: ultimoDiaMes }
+                fechagasto: { $gte: primerDiaMes, $lte: ultimoDiaMes }
             });
 
             detalleGastos.push({
@@ -176,11 +186,54 @@ const obtenerDetalleGastos = async (req, res) => {
 };
 
 
+const listarGastosEntreFechas = async (req, res) => {
+    const userId = req.user.id;
+  
+    // Obtener las fechas de inicio y fin desde la solicitud
+    const { fechaInicio, fechaFin } = req.body;
+      
+    try {
+      // Convertir las fechas de string a objetos Date
+      const startDate = new Date(fechaInicio);
+      const endDate = new Date(fechaFin);
+  
+      // Verificar si las fechas son válidas
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Formato de fecha inválido. Se espera un formato válido.'
+        });
+      }
+  
+      // Buscar los gastos asociados al usuario entre las fechas dadas
+      const gastos = await Bill.find({
+        userId: userId,
+        fechagasto: { $gte: startDate.toISOString(), $lte: endDate.toISOString() }
+      }).populate('categoria');
+  
+      return res.status(200).json({
+        status: 'success',
+        message: 'Gastos encontrados correctamente entre las fechas',
+        gastos: gastos
+      });
+    } catch (error) {
+      return res.status(500).json({
+        status: 'error',
+        message: 'Error al buscar los gastos entre las fechas',
+        error: error.message
+      });
+    }
+  };
+  
+  
+
+
 
 
 module.exports = {
     obtenerTotalPorMesYAno,
     generarTotalGastos,
     obtenerConsumosUltimos12Meses,
-    obtenerDetalleGastos
+    obtenerDetalleGastos,
+    listarGastosEntreFechas
 };

@@ -15,72 +15,80 @@ const validateGasto = require("../helpers/validateGasto")
 
 //end-point para crear el gasto
 const gasto = async (req, res) => {
-
     let params = req.body;
     console.log(params)
-    
+  
     if (!params.name || !params.description || !params.cantidad || !params.valor || !params.categoria || !params.fechagasto) {
-        return res.status(400).json({
-            status: "Error",
-            message: "Faltan datos por enviar"
-        });
+      return res.status(400).json({
+        status: "Error",
+        message: "Faltan datos por enviar"
+      });
     }
-
+  
     try {
-        // Obtener el userId del usuario autenticado desde el token
-        const userId = req.user.id;
-        console.log(userId)
-
-        // Validar el gasto usando el servicio validateGasto
-        validateGasto.validateGasto(params);
-
-
-        // Buscar la categoría asociada al gasto
-        let categoriaExistente = await Category.findOne({ userId, name: params.categoria });
-
-        if (!categoriaExistente) {
-            // Si la categoría no existe, crearla
-            categoriaExistente = await Category.create({ userId,  name: params.categoria });
-        }
-
-        // Crear el nuevo gasto asociado al usuario
-        const nuevoGasto = await Bill.create({
-            userId: userId, // Asociar el gasto al usuario actual
-            name: params.name,
-            description: params.description,
-            cantidad: params.cantidad,
-            valor: params.valor,
-            fechagasto:params.fechagasto,
-            categoria: categoriaExistente._id // Asignar el ID de la categoría existente o recién creada
-        });
-
-        // Restar el valor del gasto al saldo del usuario
-        const saldoUsuario = await Saldo.findOne({ userId: userId });
-
-        if (saldoUsuario) {
-            saldoUsuario.montoMensual -= params.valor; // Restar el valor del gasto al saldo
-            await saldoUsuario.save(); // Guardar el saldo actualizado
+      const userId = req.user.id;
+      const fechaGasto = new Date(params.fechagasto); // Convertir la fecha de string a objeto Date
+      const gastoMes = fechaGasto.getMonth() + 1; // Obtener el mes del gasto
+      const gastoAno = fechaGasto.getFullYear(); // Obtener el año del gasto
+  
+      validateGasto.validateGasto(params);
+  
+      let categoriaExistente = await Category.findOne({ userId, name: params.categoria });
+  
+      if (!categoriaExistente) {
+        categoriaExistente = await Category.create({ userId, name: params.categoria });
+      }
+  
+      const nuevoGasto = await Bill.create({
+        userId: userId,
+        name: params.name,
+        description: params.description,
+        cantidad: params.cantidad,
+        valor: params.valor,
+        fechagasto: params.fechagasto,
+        categoria: categoriaExistente._id
+      });
+  
+      const saldoUsuario = await Saldo.findOne({ userId: userId });
+  
+      if (saldoUsuario) {
+        // Verificar si el saldo es del mes del gasto
+        if (saldoUsuario.mes === gastoMes && saldoUsuario.ano === gastoAno) {
+          saldoUsuario.montoMensual -= params.valor;
+          await saldoUsuario.save();
         } else {
-            return res.status(404).json({
-                status: 'error',
-                message: 'No se encontró el saldo del usuario'
-            });
+          // Si el saldo no es del mes del gasto, buscar y actualizar el saldo correspondiente al mes del gasto
+          const saldoGastoMes = await Saldo.findOne({ userId: userId, mes: gastoMes, ano: gastoAno });
+          if (saldoGastoMes) {
+            saldoGastoMes.montoMensual -= params.valor;
+            await saldoGastoMes.save();
+          } else {
+            // Si no existe el saldo para el mes del gasto, crear uno nuevo
+            await Saldo.create({ userId: userId, mes: gastoMes, ano: gastoAno, montoMensual: -params.valor });
+          }
         }
-
-        return res.status(201).json({
-            status: "success",
-            message: "Gasto guardado de forma correcta",
-            gasto: nuevoGasto
+      } else {
+        return res.status(404).json({
+          status: 'error',
+          message: 'No se encontró el saldo del usuario'
         });
-
+      }
+  
+      return res.status(201).json({
+        status: "success",
+        message: "Gasto guardado de forma correcta",
+        gasto: nuevoGasto
+      });
+  
     } catch (error) {
-        return res.status(500).json({
-            status: "error",
-            message: "Error al guardar el gasto",
-            error: error.message
-        });
+      return res.status(500).json({
+        status: "error",
+        message: "Error al guardar el gasto",
+        error: error.message
+      });
     }
-}
+  };
+  
 
 
 //end-point para actualizar gasto
@@ -88,12 +96,12 @@ const gasto = async (req, res) => {
 const update = async (req, res) => {
     const { id } = req.params; // ID del gasto a actualizar
     const { name, description, cantidad, valor, categoria, fechagasto } = req.body; // Nuevos datos del gasto
-    console.log(id)
+  
 
     try {
         // Buscar la categoría por su nombre
         const categoriaExistente = await Category.findOne({ name: categoria });
-        console.log(categoriaExistente)
+        
 
         if (!categoriaExistente) {
             return res.status(404).json({
