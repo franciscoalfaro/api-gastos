@@ -117,28 +117,44 @@ const actualizarSaldo = async (req, res) => {
 
 const eliminarSaldo = async (req, res) => {
     const usuarioId = req.user.id; // ID del usuario autenticado desde el token
-    const { mes, año } = req.body; // Datos del saldo a eliminar (mes y año)
+    const saldoId = req.params.id; // ID del saldo a eliminar obtenido desde los parámetros
 
     try {
-        // Buscar y eliminar el saldo del usuario identificado para el mes y año dados
-        const saldoEliminado = await Saldo.findOneAndDelete({ userId: usuarioId, mes, año });
+        // Buscar el saldo a eliminar para obtener el mes, año y montoMensual
+        const saldoAEliminar = await Saldo.findById(saldoId);
+
+        if (!saldoAEliminar || saldoAEliminar.userId.toString() !== usuarioId) {
+            return res.status(404).json({
+                status: 'error',
+                message: 'No se encontró un saldo para el usuario con el ID proporcionado'
+            });
+        }
+
+        // Obtiene el mes, año y userId del saldo a eliminar
+        const { mes, ano } = saldoAEliminar;
+
+        // Eliminar el saldo del modelo Saldo
+        const saldoEliminado = await Saldo.findByIdAndDelete(saldoId);
 
         if (!saldoEliminado) {
             return res.status(404).json({
                 status: 'error',
-                message: 'No se encontró un saldo para el usuario en el mes y año dados'
+                message: 'No se encontró un saldo para eliminar'
             });
         }
 
+        // Eliminar los documentos en el modelo Total correspondientes al userId, mes y año
+        await Total.deleteMany({ userId: usuarioId, mes, ano });
+
         return res.status(200).json({
             status: 'success',
-            message: 'Saldo eliminado correctamente',
+            message: 'Saldo y documentos relacionados en Total eliminados correctamente',
             saldo: saldoEliminado
         });
     } catch (error) {
         return res.status(500).json({
             status: 'error',
-            message: 'Error al eliminar el saldo',
+            message: 'Error al eliminar el saldo y documentos relacionados en Total',
             error: error.message
         });
     }
@@ -146,16 +162,19 @@ const eliminarSaldo = async (req, res) => {
 
 
 
+
+
 //este end-poit es para listar el historico del saldo del usuario 
 const listarSaldo = async (req, res) => {
     const usuarioId = req.user.id; // Obtener el ID del usuario autenticado desde el token
+    
     let page = 1;
 
     if (req.params.page) {
         page = parseInt(req.params.page);
     }
 
-    const itemPerPage = 6;
+    const itemPerPage = 4;
 
     const opciones = {
         page: page,
@@ -167,6 +186,7 @@ const listarSaldo = async (req, res) => {
     try {
         // Filtrar el saldo por el ID del usuario
         const total = await Saldo.paginate({ userId: usuarioId }, opciones);
+
 
         if (!total || total.docs.length === 0) {
             return res.status(404).json({
@@ -197,33 +217,34 @@ const saldoActual = async (req, res) => {
     const usuarioId = req.user.id;
 
     try {
-        // Buscar los saldos del usuario, ordenados por fecha descendente
-        const saldosUsuario = await Saldo.find({ userId: usuarioId })
-            .sort({ create_at: -1 })
-            .limit(1);
+        // Obtener la fecha actual
+        const fechaActual = new Date();
+        const mesActual = fechaActual.getMonth() + 1; // El mes es base cero, por lo que sumamos 1 para obtener el mes actual
 
-        if (!saldosUsuario || saldosUsuario.length === 0) {
+        // Buscar el saldo del usuario para el mes actual
+        const saldoActualUsuario = await Saldo.findOne({ userId: usuarioId, mes: mesActual });
+
+        if (!saldoActualUsuario) {
             return res.status(404).json({
                 status: 'error',
-                message: 'No se encontró saldo para el usuario',
+                message: 'No se encontró saldo para el usuario en el mes actual',
             });
         }
 
-        const saldoActual = saldosUsuario[0]; // Tomar el primer saldo (el más reciente)
-
         return res.status(200).json({
             status: 'success',
-            message: 'Saldo actual encontrado',
-            saldoUser:saldoActual,
+            message: 'Saldo actual del mes encontrado',
+            saldoUser: saldoActualUsuario,
         });
     } catch (error) {
         return res.status(500).json({
             status: 'error',
-            message: 'Error al listar el saldo actual',
+            message: 'Error al obtener el saldo actual del mes',
             error: error.message,
         });
     }
 };
+
 
 
 

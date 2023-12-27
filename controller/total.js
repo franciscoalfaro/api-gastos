@@ -48,7 +48,7 @@ const generarTotalGastos = async (req, res) => {
       // Recorrer desde enero hasta el mes actual para calcular los gastos
       for (let month = 1; month <= currentMonth; month++) {
         // Mostrar el mes actual en el console.log
-        console.log('Procesando el mes:', month);
+        //console.log('Procesando el mes:', month);
   
         // Encontrar el saldo inicial del usuario para el mes y año actuales del bucle
         saldoInicial = await Total.findOne({ userId, mes: month, ano: currentYear });
