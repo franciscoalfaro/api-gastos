@@ -8,6 +8,7 @@ const User = require("../models/user")
 const Category = require("../models/category")
 const Bill = require("../models/bills")
 const Saldo = require("../models/saldo")
+const Total = require("../models/total")
 
 //importar servicio
 const validateGasto = require("../helpers/validateGasto")
@@ -319,11 +320,18 @@ const obtenerDetalleGastos = async (req, res) => {
                 fechagasto: { $gte: primerDiaMes, $lte: ultimoDiaMes }
             });
 
+            const total = await Total.findOne({
+                userId: userId,
+                mes: primerDiaMes.getMonth() + 1, // Mes está indexado desde 0, se suma 1 para igualar
+                ano: primerDiaMes.getFullYear()
+            });
+
             detalleGastos.push({
                 mes: primerDiaMes.toLocaleString('es-ES', { month: 'long' }),
                 ano: primerDiaMes.getFullYear(),
                 totalGastos: gastosMes.reduce((total, gasto) => total + gasto.valor, 0),
-                gastos: gastosMes
+                gastos: gastosMes,
+                saldoInicial: total ? total.montoMensual : 0,
             });
         }
 
