@@ -149,15 +149,32 @@ const actualizarCategoria = async (req, res) => {
 
 const listarCategorias = async (req, res) => {
     const userId = req.user.id; // Suponiendo que tienes el ID del usuario en el token
+    let page = 1;
+
+    if (req.params.page) {
+        page = parseInt(req.params.page);
+    }
+
+    const itemPerPage = 4;
 
     try {
+        const options = {
+            page: page,
+            limit: itemPerPage,
+            
+        };
         // Buscar todas las categorías asociadas al usuario
-        const categorias = await Category.find({ userId });
+        const categorias = await Category.paginate({ userId},options );
 
         return res.status(200).json({
             status: 'success',
             message: 'Categorías encontradas',
-            categorias
+            categorias:categorias.docs,
+            totalPages: categorias.totalPages,
+            totalCategories: categorias.totalCategoria,
+            itempage: categorias.limit,
+            page: categorias.page,
+            totalDocs:categorias.totalDocs
         });
     } catch (error) {
         return res.status(500).json({

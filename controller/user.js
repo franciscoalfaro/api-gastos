@@ -21,7 +21,7 @@ const register = (req, res) => {
     //comprobar datos + validacion
     if (!params.name || !params.nick || !params.email || !params.password) {
         return res.status(400).json({
-            status: "Error",
+            status: "error",
             message: "faltan datos por enviar"
         })
     }
@@ -145,7 +145,7 @@ const profile = async (req, res) => {
         User.findById(userProfile)
         .select({ "password": 0, "role": 0 })
         .then(async (userProfile) => {
-            if (!userProfile) return res.status(404).json({ status: "Error", message: "NO SE HA ENCONTRADO EL USUARIO" })
+            if (!userProfile) return res.status(404).json({ status: "error", message: "NO SE HA ENCONTRADO EL USUARIO" })
 
             return res.status(200).json({
                 status: "success",
@@ -183,7 +183,7 @@ const list = (req, res)=>{
     try {
         User.paginate({}, opciones, async (error, users) => {
 
-            if (error || !users) return res.status(404).json({ status: "Error", message: "NO SE HA ENCONTRADO EL USUARIO" })
+            if (error || !users) return res.status(404).json({ status: "error", message: "NO SE HA ENCONTRADO EL USUARIO" })
 
             return res.status(200).send({
                 status: "success",
