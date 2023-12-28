@@ -17,8 +17,7 @@ const validateGasto = require("../helpers/validateGasto")
 //end-point para crear el gasto
 const gasto = async (req, res) => {
     let params = req.body;
-    console.log(params)
-  
+      
     if (!params.name || !params.description || !params.cantidad || !params.valor || !params.categoria || !params.fechagasto) {
       return res.status(400).json({
         status: "Error",

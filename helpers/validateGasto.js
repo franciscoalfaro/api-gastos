@@ -15,7 +15,7 @@ const validateGasto = (params) => {
         validator.isNumeric(params.valor, { min: 1, max: undefined })
         
 
-    let fechagasto = !validator.isEmpty(params.fechagasto) && !validator.isDate(params.fechagasto,{format: 'DD/MM/YYYY'});
+    let fechagasto = !validator.isEmpty(params.fechagasto) && !validator.isDate(params.fechagasto,{format: 'YYYY/MM/DD'});
    
 
     let categoria = !validator.isEmpty(params.categoria) &&
