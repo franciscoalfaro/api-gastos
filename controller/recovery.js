@@ -69,7 +69,7 @@ async function enviarCorreoRecuperacion(email, nuevaContrasena) {
     });
 
     const mailOptions = {
-        from: 'suport@testsocial.org', // Cambia con tu dirección de correo de IONOS
+        from: emailUser, // Cambia con tu dirección de correo de IONOS
         to: email,
         subject: 'Recuperación de Contraseña',
         text: `Tu nueva contraseña temporal es: ${nuevaContrasena}. Te recomendamos cambiarla una vez hayas iniciado sesión.`
