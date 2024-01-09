@@ -26,6 +26,7 @@ const BillsRoutes = require("./routes/bills")
 const SaldoRoutes = require("./routes/saldo")
 const TotalRoutes = require("./routes/total")
 const RecoveryRouter = require("./routes/recovery")
+const IndicadorRouter = require("./routes/indicador")
 
 app.use("/api/user" ,UserRoutes)
 app.use("/api/bills",BillsRoutes)
@@ -33,6 +34,7 @@ app.use("/api/category",CategoryRoutes )
 app.use("/api/saldo", SaldoRoutes)
 app.use("/api/total", TotalRoutes)
 app.use("/api/recovery", RecoveryRouter)
+app.use("/api/indicador", IndicadorRouter)
 
 
 //escuchar peticiones 
