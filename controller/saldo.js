@@ -87,8 +87,8 @@ const actualizarSaldo = async (req, res) => {
         }
 
         // Actualizar el registro de saldo existente
-        saldoExistente.montoMensual = montoMensual;
-        saldoExistenteTotal.montoMensual = montoMensual
+        saldoExistente.montoMensual = parseInt(saldoExistente.montoMensual) + parseInt(montoMensual);
+        saldoExistenteTotal.montoMensual = parseInt(saldoExistenteTotal.montoMensual) + parseInt(montoMensual);
         // Verificar y actualizar los campos opcionales
         if (tope1 !== undefined) {
             saldoExistente.tope1 = tope1;
