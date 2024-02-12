@@ -12,7 +12,7 @@ const fetch = require('node-fetch')
 
 
 
-// acciones de prueba
+// obtener dolar observador
 const usd = async () => {
     try {
         const today = moment().format('YYYY-MM-DD');
@@ -54,7 +54,7 @@ const usd = async () => {
 };
 
 
-cron.schedule('30 17  * * *', async () => {
+cron.schedule('00 13  * * *', async () => {
     try {
         console.log('Ejecutando actualización de datos...');
         await usd();
@@ -91,13 +91,15 @@ const dolarobservador = async (req, res) => {
 
         indicadores.docs.forEach(indicador => {
             indicador.Obs.forEach(obs => {
-                const { indexDateString, value } = obs;
-                if (!dolarObsHoy[indexDateString] && !dolarObsAyer[indexDateString]) {
-                    if (indexDateString === moment().format('DD-MM-YYYY')) {
-                        dolarObsHoy[indexDateString] = value;
-                    } else if (indexDateString === moment().subtract(2, 'day').format('DD-MM-YYYY')) {
-                        dolarObsAyer[indexDateString] = value;
-                    }
+                const { indexDateString, value, _id, statusCode } = obs;
+                
+                const todayDateString = moment().format('DD-MM-YYYY');
+                const yesterdayDateString = moment().subtract(2, 'day').format('DD-MM-YYYY');
+        
+                if (indexDateString === todayDateString) {
+                    dolarObsHoy[statusCode] = {id:_id, fecha: indexDateString, valor: value };
+                } else if (indexDateString === yesterdayDateString) {
+                    dolarObsAyer[statusCode] = {id:_id, fecha: indexDateString, valor: value };
                 }
             });
         });
@@ -105,8 +107,8 @@ const dolarobservador = async (req, res) => {
         return res.status(200).send({
             status: 'success',
             message: 'Valores del dólar observado de hoy y ayer',
-            dolarObsHoy: dolarObsHoy,
-            dolarObsAyer: dolarObsAyer
+            dolarObsHoy:dolarObsHoy.OK,
+            dolarObsAyer:dolarObsAyer.OK,
         });
     } catch (error) {
         console.log(error);

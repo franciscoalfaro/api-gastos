@@ -4,6 +4,6 @@ const IndicadorController = require("../controller/indicador")
 const check = require("../middlewares/auth")
 
 //ruta para crear actualizar y elmiminar gastos
-router.get("/economico", IndicadorController.dolarobservador)
+router.get("/economico",check.auth, IndicadorController.dolarobservador)
 
 module.exports=router
