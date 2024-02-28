@@ -54,7 +54,7 @@ const usd = async () => {
 };
 
 
-cron.schedule('0 9,0 17 * * *', async () => {
+cron.schedule('0 09,00 17 * * *', async () => {
     try {
         console.log('Ejecutando actualización de datos...');
         await usd();
