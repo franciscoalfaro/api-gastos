@@ -192,12 +192,13 @@ const listarCategoriasDrop = async (req, res) => {
     try {
 
         // Buscar todas las categorías asociadas al usuario
-        const categorias = await Category.paginate({ userId} );
+        const categorias = await Category.find({ userId} );
+        console.log(categorias)
 
         return res.status(200).json({
             status: 'success',
             message: 'Categorías encontradas',
-            categorias:categorias.docs
+            categorias:categorias
         });
     } catch (error) {
         return res.status(500).json({
