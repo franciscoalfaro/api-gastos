@@ -87,7 +87,7 @@ const gasto = async (req, res) => {
         error: error.message
       });
     }
-  };
+};
   
 
 
@@ -347,6 +347,11 @@ const obtenerDetalleGastos = async (req, res) => {
         });
     }
 };
+
+
+//gastos de react-native
+
+
 
 
 
