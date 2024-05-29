@@ -59,7 +59,7 @@ async function enviarCorreoRecuperacion(email, nuevaContrasena) {
     const emailPassword = process.env.EMAIL_PASSWORD;
 
     const transporter = nodemailer.createTransport({
-        host: 'smtp.ionos.com',
+        host: 'smtp.zoho.com',
         port: 587,
         secure: false,
         auth: {
