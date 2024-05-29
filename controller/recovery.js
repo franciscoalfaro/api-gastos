@@ -53,23 +53,23 @@ function generarNuevaContrasena() {
     return nuevaContrasena;
 }
 
-// Función para enviar correo de recuperación utilizando IONOS SMTP
+// Función para enviar correo de recuperación utilizando zoho SMTP
 async function enviarCorreoRecuperacion(email, nuevaContrasena) {
     const emailUser = process.env.EMAIL_USER;
     const emailPassword = process.env.EMAIL_PASSWORD;
 
     const transporter = nodemailer.createTransport({
-        host: 'smtp.ionos.com',
+        host: 'smtp.zoho.com',
         port: 587,
         secure: false,
         auth: {
-            user: emailUser, // Cambia con tu dirección de correo de IONOS 
+            user: emailUser, // Cambia con tu dirección de correo de zoho
             pass: emailPassword // Cambia con tu contraseña
         }
     });
 
     const mailOptions = {
-        from: emailUser, // Cambia con tu dirección de correo de IONOS
+        from: emailUser, // Cambia con tu dirección de correo de zoho
         to: email,
         subject: 'Recuperación de Contraseña',
         text: `Tu nueva contraseña temporal es: ${nuevaContrasena}. Te recomendamos cambiarla una vez hayas iniciado sesión.`
