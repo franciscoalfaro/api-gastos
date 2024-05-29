@@ -2,6 +2,8 @@ require('dotenv').config();
 const bcrypt = require('bcrypt');
 const User = require('../models/user');
 const nodemailer = require('nodemailer');
+const fs = require("fs")
+const path = require("path");
 
 const recuperarContrasena = async (req, res) => {
     const { email } = req.body;
@@ -68,11 +70,14 @@ async function enviarCorreoRecuperacion(email, nuevaContrasena) {
         }
     });
 
+    const emailTemplatePath = path.join('uploads', 'html', 'reset-password.html');
+    const emailTemplate = fs.readFileSync(emailTemplatePath, 'utf8');
+
     const mailOptions = {
-        from: emailUser, // Cambia con tu dirección de correo de zoho
+        from: emailUser, // Cambia con tu dirección de correo de tu servidor
         to: email,
         subject: 'Recuperación de Contraseña',
-        text: `Tu nueva contraseña temporal es: ${nuevaContrasena}. Te recomendamos cambiarla una vez hayas iniciado sesión.`
+        html: emailTemplate.replace('${nuevaContrasena}', nuevaContrasena)
     };
 
     await transporter.sendMail(mailOptions);
