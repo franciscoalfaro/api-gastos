@@ -39,6 +39,8 @@ JWT_SECRET=tu_clave_secreta
 PORT=3001
 EMAIL_USER=tu_email@example.com
 EMAIL_PASSWORD=tu_password
+KEYBANK = TuKeyBank BANCO CENTRAL
+USERBANK = usuario BANCO CENTRAL
 ```
 
 Inicia el servidor:
