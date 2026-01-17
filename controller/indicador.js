@@ -1,4 +1,5 @@
 //importar dependencias y modulos
+require('dotenv').config();
 const fs = require("fs")
 const bcrypt = require("bcrypt")
 const mongoosePagination = require('mongoose-paginate-v2')
@@ -9,16 +10,13 @@ const Indicador = require("../models/indicador")
 const cron = require('node-cron');
 const fetch = require('node-fetch')
 
-
-
-
+const key = process.env.KEYBANK
+const user = process.env.USERBANK
 // obtener dolar observador
 const usd = async () => {
     try {
         const today = moment().format('YYYY-MM-DD');
         const yesterday = moment().subtract(1, 'day').format('YYYY-MM-DD');
-        console.log('hoy', today);
-        console.log('ayer', yesterday);
    
         const isWeekend = moment().isoWeekday() > 5;
 
@@ -27,7 +25,7 @@ const usd = async () => {
             return;
         }
 
-        const url = `https://si3.bcentral.cl/SieteRestWS/SieteRestWS.ashx?user=franciscoalfar@gmail.com&pass=Tito2811&firstdate=${yesterday}&lastdate=${today}&timeseries=F073.TCO.PRE.Z.D&function=GetSeries`;
+        const url = `https://si3.bcentral.cl/SieteRestWS/SieteRestWS.ashx?user=${user}&pass=${key}&firstdate=${yesterday}&lastdate=${today}&timeseries=F073.TCO.PRE.Z.D&function=GetSeries`;
 
         const response = await fetch(url);
         const data = await response.json();
@@ -54,7 +52,7 @@ const usd = async () => {
 };
 
 
-cron.schedule('0 09,00 17 * * *', async () => {
+cron.schedule('0 09,12,14,16 * * *', async () => {
     try {
         console.log('Ejecutando actualización de datos...');
         await usd();
