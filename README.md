@@ -1,19 +1,26 @@
 # 📊 API Gastos
 
-API Gastos es un backend REST desarrollado con Node.js, Express y MongoDB para la gestión de gastos personales.
+![Node.js](https://img.shields.io/badge/Node.js-18.x-green?logo=node.js)
+![Express](https://img.shields.io/badge/Express-4.x-lightgrey?logo=express)
+![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-brightgreen?logo=mongodb)
+![AWS](https://img.shields.io/badge/Deployed-AWS-orange?logo=amazon-aws)
+![License](https://img.shields.io/badge/License-MIT-blue)
+
+***API Gastos** es un backend REST desarrollado con **Node.js**, **Express** y **MongoDB** para la gestión de gastos personales.
 Permite administrar usuarios, gastos, categorías, saldos y obtener indicadores financieros, incorporando autenticación segura con JWT y recuperación de contraseña vía email.
 
 ---
 
 ## 🚀 Tecnologías principales
 
-- Node.js
-- Express
-- MongoDB + Mongoose
-- JSON Web Tokens (JWT)
-- Multer (subida de archivos)
-- Nodemailer
-- dotenv
+- **Node.js**
+- **Express**
+- **MongoDB + Mongoose**
+- **JSON Web Tokens (JWT)**
+- **Multer (subida de archivos)**
+- **Nodemailer** para envio de correos
+- **dotenv** para variables de entorno
+- **AWS** (EC2 / Elastic Beanstalk / otro)
 - CORS y middlewares de seguridad
 
 ---
