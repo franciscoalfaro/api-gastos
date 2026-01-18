@@ -8,6 +8,7 @@
 
 **API Gastos** es un backend REST desarrollado con **Node.js**, **Express** y **MongoDB** para la gestión de gastos personales.
 Permite administrar usuarios, gastos, categorías, saldos y obtener indicadores financieros, incorporando autenticación segura con JWT y recuperación de contraseña vía email.
+Está desplegada en **AWS** y soporta autenticación, operaciones CRUD de usuarios y agendas, y subida de archivos de avatar.
 
 ---
 
