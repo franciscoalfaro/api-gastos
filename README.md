@@ -22,28 +22,29 @@ Permite administrar usuarios, gastos, categorías, saldos y obtener indicadores 
 
 Clonar repositorio:
 
-git clone https://github.com/franciscoalfaro/api-gastos.git  
+1. Clona el repositorio:
+```bash
+git clone https://github.com/franciscoalfaro/api-gastos.git
 cd api-gastos
+```
 
-Instalar dependencias:
-
+2. Instala dependencias:
+```bash
 npm install
+```
 
-Crear archivo .env basado en .env.example:
+3. Crea un archivo `.env` en la raíz del proyecto usando como base el archivo `.env.example`.
 
 MONGODB_URI=mongodb://localhost:27017/api-gastos  
 
-JWT_SECRET=tu_clave_secreta  
-PORT=3001  
-EMAIL_USER=tu_email@example.com  
-EMAIL_PASSWORD=tu_password  
-KEYBANK=TuKeyBancoCentral  
-USERBANK=UsuarioBancoCentral  
-
-Iniciar servidor:
-
-npm run dev   # entorno desarrollo  
-npm start     # entorno producción  
+4. Inicia el servidor en modo desarrollo:
+```bash
+npm run dev
+```
+Producción:
+```bash
+npm start
+```
 
 ---
 
