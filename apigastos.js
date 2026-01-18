@@ -9,7 +9,7 @@ console.log("API Connection success")
 connection();
 
 const app = express();
-const puerto = 3001;
+const puerto = process.env.PORT;
 
 //configurar cors
 app.use(cors());

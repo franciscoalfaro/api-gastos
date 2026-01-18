@@ -32,6 +32,7 @@ npm install
 Crear archivo .env basado en .env.example:
 
 MONGODB_URI=mongodb://localhost:27017/api-gastos  
+
 JWT_SECRET=tu_clave_secreta  
 PORT=3001  
 EMAIL_USER=tu_email@example.com  
