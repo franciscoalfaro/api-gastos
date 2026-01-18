@@ -35,8 +35,6 @@ npm install
 
 3. Crea un archivo `.env` en la raíz del proyecto usando como base el archivo `.env.example`.
 
-MONGODB_URI=mongodb://localhost:27017/api-gastos  
-
 4. Inicia el servidor en modo desarrollo:
 ```bash
 npm run dev
